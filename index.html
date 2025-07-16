@@ -1,0 +1,264 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ordina ESSEMARE</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e') no-repeat center center fixed;
+      background-size: cover;
+      color: #003366;
+    }
+
+    header {
+      background-color: rgba(0, 119, 182, 0.85);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 30px;
+      font-weight: bold;
+      text-shadow: 1px 1px 4px #000;
+      border-bottom: 2px solid white;
+    }
+
+    main {
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.88);
+      margin: 20px;
+      border-radius: 15px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+      backdrop-filter: blur(5px);
+    }
+
+    .hidden { display: none; }
+
+    button, input, select {
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #0077b6;
+      width: 100%;
+      font-size: 16px;
+    }
+
+    .button {
+      background-color: #0077b6;
+      color: white;
+      font-weight: bold;
+      border: none;
+      transition: 0.3s;
+    }
+
+    .button:hover {
+      background-color: #005f91;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      background-color: #e6f7ff;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      border: 1px solid #0077b6;
+      padding: 10px;
+      text-align: center;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    .highlight {
+      color: #ffd700;
+    }
+
+    .sfondo {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .whatsapp-support {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 999;
+    }
+
+    .whatsapp-support a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      background-color: #25D366;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 50px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: background-color 0.3s ease;
+    }
+
+    .whatsapp-support a:hover {
+      background-color: #128C7E;
+    }
+
+    .whatsapp-support img {
+      height: 24px;
+      width: 24px;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>ORDINA <span class="highlight">ESSEMARE</span></header>
+  <main>
+    <button onclick="toggle('cliente')">🛒 Cliente</button>
+    <button onclick="toggle('login')">🔐 Admin</button>
+
+    <section id="cliente" class="hidden sfondo">
+      <h2>Ordina ora</h2>
+      <table>
+        <thead><tr><th>Prodotto</th><th>Disponibile</th><th>Quantità</th></tr></thead>
+        <tbody id="prodottiCliente"></tbody>
+      </table>
+      <input id="nomeCliente" placeholder="Il tuo nome" />
+      <button class="button" onclick="inviaOrdine()">📲 Invia ordine</button>
+      <p id="okOrdine" style="color: green; display:none;">✅ Ordine inviato!</p>
+    </section>
+
+    <section id="login" class="hidden sfondo">
+      <input type="password" id="adminPwd" placeholder="Password admin" />
+      <button class="button" onclick="loginAdmin()">🔓 Entra</button>
+    </section>
+
+    <section id="admin" class="hidden sfondo">
+      <h2>Gestione prodotti</h2>
+      <input id="nomeProdotto" placeholder="Nome prodotto" />
+      <input id="prezzoProdotto" type="number" placeholder="Prezzo (€)" />
+      <input id="quantitaProdotto" type="number" placeholder="Quantità disponibile" />
+      <select id="unitaProdotto">
+        <option value="Kg">Kg</option>
+        <option value="Pezzi">Pezzi</option>
+      </select>
+      <button class="button" onclick="aggiungiProdotto()">➕ Aggiungi</button>
+      <ul id="listaProdottiAdmin"></ul>
+      <h2>Ordini ricevuti</h2>
+      <ul id="listaOrdini"></ul>
+    </section>
+  </main>
+
+  <div class="whatsapp-support">
+    <a href="https://wa.me/3757355526" target="_blank">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" />
+      Supporto WhatsApp
+    </a>
+  </div>
+
+  <script>
+    let prodotti = [
+      { nome: "Trancio di Tonno Pinna Gialla", prezzo: 19.80, quantita: 10, unita: "Kg" },
+      { nome: "Merluzzo Nordico", prezzo: 15.00, quantita: 20, unita: "Pezzi" }
+    ];
+    let ordini = [];
+    const password = "essemare2025";
+    const numero = "3757355526";
+
+    function toggle(id) {
+      document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
+      document.getElementById(id).classList.remove("hidden");
+      if (id === "cliente") aggiornaCliente();
+      if (id === "admin") aggiornaAdmin();
+    }
+
+    function loginAdmin() {
+      const pwd = document.getElementById("adminPwd").value;
+      if (pwd === password) toggle("admin");
+      else alert("Password errata");
+    }
+
+    function aggiungiProdotto() {
+      const nome = document.getElementById("nomeProdotto").value;
+      const prezzo = parseFloat(document.getElementById("prezzoProdotto").value);
+      const quantita = parseFloat(document.getElementById("quantitaProdotto").value);
+      const unita = document.getElementById("unitaProdotto").value;
+      if (nome && !isNaN(prezzo) && !isNaN(quantita) && unita) {
+        prodotti.push({ nome, prezzo, quantita, unita });
+        aggiornaCliente();
+        aggiornaAdmin();
+        document.getElementById("nomeProdotto").value = "";
+        document.getElementById("prezzoProdotto").value = "";
+        document.getElementById("quantitaProdotto").value = "";
+      }
+    }
+
+    function rimuoviProdotto(index) {
+      prodotti.splice(index, 1);
+      aggiornaCliente();
+      aggiornaAdmin();
+    }
+
+    function aggiornaCliente() {
+      const body = document.getElementById("prodottiCliente");
+      body.innerHTML = "";
+      prodotti.forEach((p, i) => {
+        body.innerHTML += `
+          <tr>
+            <td>${p.nome}</td>
+            <td>${p.quantita} ${p.unita}</td>
+            <td><input id="qty${i}" type="number" min="0" max="${p.quantita}" /></td>
+          </tr>
+        `;
+      });
+    }
+
+    function aggiornaAdmin() {
+      const lista = document.getElementById("listaProdottiAdmin");
+      lista.innerHTML = "";
+      prodotti.forEach((p, i) => {
+        lista.innerHTML += `<li>${p.nome} - €${p.prezzo} - ${p.quantita} ${p.unita} disponibili 
+        <button onclick="rimuoviProdotto(${i})">❌ Rimuovi</button></li>`;
+      });
+      const ordiniLista = document.getElementById("listaOrdini");
+      ordiniLista.innerHTML = "";
+      ordini.forEach(o => {
+        ordiniLista.innerHTML += `<li><b>${o.nome}</b>: ${o.lista}
+          <br><button onclick="inviaWhatsApp('${o.nome}', '${o.lista}')">📲 Invia su WhatsApp</button></li>`;
+      });
+    }
+
+    function inviaOrdine() {
+      const nome = document.getElementById("nomeCliente").value;
+      if (!nome) return alert("Inserisci il tuo nome");
+      let lista = [];
+      prodotti.forEach((p, i) => {
+        const qty = parseFloat(document.getElementById("qty" + i).value);
+        if (!isNaN(qty) && qty > 0 && qty <= p.quantita) {
+          lista.push(`${p.nome} - ${qty} ${p.unita}`);
+          p.quantita -= qty;
+        }
+      });
+      if (lista.length === 0) return alert("Nessun prodotto selezionato o quantità errate");
+      ordini.push({ nome, lista: lista.join(", ") });
+      document.getElementById("okOrdine").style.display = "block";
+      aggiornaCliente();
+      aggiornaAdmin();
+    }
+
+    function inviaWhatsApp(nome, lista) {
+      const msg = `Nuovo ordine da ${nome}: ${lista}`;
+      window.open(`https://wa.me/${numero}?text=${encodeURIComponent(msg)}`);
+    }
+
+    aggiornaCliente();
+  </script>
+</body>
+</html>
